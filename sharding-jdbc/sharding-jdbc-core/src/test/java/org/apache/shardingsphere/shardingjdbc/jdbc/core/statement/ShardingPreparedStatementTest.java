@@ -196,7 +196,6 @@ public final class ShardingPreparedStatementTest extends AbstractShardingJDBCDat
             preparedStatement.setString(1, "init");
             preparedStatement.setString(2, "batch");
             preparedStatement.addBatch();
-            
             int[] result = preparedStatement.executeBatch();
             assertThat(result.length, is(3));
             assertThat(result[0], is(4));
@@ -218,6 +217,18 @@ public final class ShardingPreparedStatementTest extends AbstractShardingJDBCDat
             preparedStatement.clearBatch();
             int[] result = preparedStatement.executeBatch();
             assertThat(result.length, is(0));
+        }
+    }
+    
+    @Test
+    public void assertInitPreparedStatementExecutorWithReplayMethod() throws SQLException {
+        String sql = "SELECT item_id from t_order_item where user_id = ? and order_id= ? and status = 'BATCH'";
+        try (PreparedStatement preparedStatement = getShardingDataSource().getConnection().prepareStatement(sql)) {
+            preparedStatement.setQueryTimeout(1);
+            preparedStatement.setInt(1, 11);
+            preparedStatement.setInt(2, 11);
+            preparedStatement.executeQuery();
+            assertThat(preparedStatement.getQueryTimeout(), is(1));
         }
     }
 }
